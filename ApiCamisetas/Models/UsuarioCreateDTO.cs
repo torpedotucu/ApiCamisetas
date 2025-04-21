@@ -4,11 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace ApiCamisetas.Models
 {
     public class UsuarioCreateDTO
-    {
-        
-       
-
-       
+    {       
         public string UserName { get; set; }
         public string AliasName { get; set; }
         public string Correo { get; set; }

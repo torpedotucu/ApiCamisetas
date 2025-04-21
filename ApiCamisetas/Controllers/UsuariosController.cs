@@ -76,5 +76,44 @@ namespace ApiCamisetas.Controllers
             return Ok(usuarioPuros);
             
         }
+
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult> PublicacionesInicio()
+        {
+            Usuario user = this.helper.GetUsuario();
+            List<Camiseta> camisetas = await this.repo.GetPublicacionesInicio(user.IdUsuario);
+
+            return Ok(camisetas);
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("[action]/{codigoAmigo}")]
+        public async Task<ActionResult>Amigo(string codigoAmigo)
+        {
+            Usuario usuario = await this.repo.FindUsuarioAmistadCode(codigoAmigo);
+            if (usuario==null)
+            {
+                return NotFound();
+            }
+            return Ok(usuario);
+        }
+        [Authorize]
+        [HttpPost]
+        [Route("[action]")]
+        public async Task <ActionResult>SetAmistad( int idUsuario)
+        {
+            int usuarioA =  this.helper.GetUsuario().IdUsuario;
+            int usuarioB = idUsuario;
+            if(await this.repo.AreAlreadyFriends(usuarioA, usuarioB))
+            {
+                return Conflict(new { mensaje = "Ya son amigos " });
+            }
+            await this.repo.SetAmistad(usuarioA, usuarioB);
+            return Ok();
+
+        }
     }
 }

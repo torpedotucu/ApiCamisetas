@@ -80,14 +80,27 @@ namespace ApiCamisetas.Repositories
             return camiseta;
         }
 
-        public async Task<int> SubirCamiseta(Camiseta camiseta)
-        {
-            await this.context.Camisetas.AddAsync(camiseta);
+        public async Task<int> SubirCamiseta(int idUsuario,CamisetaCreateDTO camiseta)
+        { 
+            Camiseta camiseta1 = new Camiseta();
+            camiseta1.Equipo = camiseta.Equipo;
+            camiseta1.IdCamiseta=await this.GetMaxIdCamiseta();
+            camiseta1.CodigoPais = camiseta.CodigoPais;
+            camiseta1.Year = camiseta.Year;
+            camiseta1.Marca = camiseta.Marca;
+            camiseta1.Equipacion = camiseta.Equipacion;
+            camiseta1.Condicion = camiseta.Condicion;
+            camiseta1.Dorsal = camiseta.Dorsal;
+            camiseta1.Jugador = camiseta.Jugador;
+            camiseta1.EsActiva = 1;
+            camiseta1.IdUsuario = idUsuario;
+            camiseta1.FechaSubida = DateTime.Now;
+            await this.context.Camisetas.AddAsync(camiseta1);
             await this.context.SaveChangesAsync();
-            return camiseta.IdCamiseta;
+            return camiseta1.IdCamiseta;
         }
 
-        public async Task ModificarCamiseta(int idCamiseta, int? year, string? marca, string? descripcion, string? condicion, int? dorsal, string? jugador, string?nombreImagen, int idUsuario)
+        public async Task ModificarCamiseta(int idCamiseta,CamisetaUpdateDTO camiseta)
         {
             Camiseta cam = await this.GetCamiseta(idCamiseta);
 
@@ -99,53 +112,45 @@ namespace ApiCamisetas.Repositories
             bool cambios = false;
 
 
-            if (year.HasValue && cam.Year != year.Value)
+            if (camiseta.Year.HasValue && cam.Year != camiseta.Year.Value)
             {
-                cam.Year = year.Value;
+                cam.Year = camiseta.Year.Value;
                 cambios = true;
             }
 
-            if (!string.IsNullOrEmpty(marca) && cam.Marca != marca)
+            if (!string.IsNullOrEmpty(camiseta.Marca) && cam.Marca != camiseta.Marca)
             {
-                cam.Marca = marca;
+                cam.Marca =camiseta.Marca;
                 cambios = true;
             }
 
 
-            if (!string.IsNullOrEmpty(descripcion) && cam.Descripcion != descripcion)
+            if (!string.IsNullOrEmpty(camiseta.Descripcion) && cam.Descripcion != camiseta.Descripcion)
             {
-                cam.Descripcion = descripcion;
+                cam.Descripcion = camiseta.Descripcion;
                 cambios = true;
             }
 
-            if (!string.IsNullOrEmpty(condicion) && cam.Condicion != condicion)
+            if (!string.IsNullOrEmpty(camiseta.Condicion) && cam.Condicion != camiseta.Condicion)
             {
-                cam.Condicion = condicion;
+                cam.Condicion = camiseta.Condicion;
                 cambios = true;
             }
 
-            if (dorsal.HasValue && cam.Dorsal != dorsal.Value)
+            if (camiseta.Dorsal.HasValue && cam.Dorsal != camiseta.Dorsal.Value)
             {
-                cam.Dorsal = dorsal.Value;
+                cam.Dorsal = camiseta.Dorsal.Value;
                 cambios = true;
             }
 
-            if (!string.IsNullOrEmpty(jugador) && cam.Jugador != jugador)
+            if (!string.IsNullOrEmpty(camiseta.Jugador) && cam.Jugador != camiseta.Jugador)
             {
-                cam.Jugador = jugador;
+                cam.Jugador = camiseta.Jugador;
                 cambios = true;
             }
-
-            //if (imagen!=null && !string.IsNullOrEmpty(imagen)&& cam.Imagen != imagen)
-            //{
-            //    string filename = this.GenerateUniqueFileName(idUsuario, imagen);
-            //    cam.Imagen=filename;
-            //    await this.SubirFichero(imagen, Folders.Jerseys, filename);
-            //    cambios=true;
-            //}
-            if (!string.IsNullOrEmpty(nombreImagen) && cam.Imagen != nombreImagen)
+            if (!string.IsNullOrEmpty(camiseta.Imagen) && cam.Imagen != camiseta.Imagen)
             {
-                cam.Imagen = nombreImagen;
+                cam.Imagen = camiseta.Imagen;
                 cambios = true;
             }
 
@@ -475,6 +480,18 @@ namespace ApiCamisetas.Repositories
         public async Task<List<UsuarioPuro>> GetUsuarioPurosAsync()
         {
             return await this.context.UsuariosPuros.ToListAsync();
+        }
+
+        public async Task DeleteComentario(int idComentario)
+        {
+            Comentario comentario = await this.context.Comentarios.Where(x => x.IdComentario==idComentario).FirstOrDefaultAsync();
+            this.context.Remove(comentario);
+            await this.context.SaveChangesAsync();
+        }
+        public async Task<int> GetComentarioUsuario(int idComentario)
+        {
+            Comentario c  =await this.context.Comentarios.Where(x => x.IdComentario==idComentario).FirstOrDefaultAsync();
+            return c.UsuarioId;
         }
     }
 }
