@@ -159,35 +159,35 @@ namespace ApiCamisetas.Repositories
 
 
         //REVISAR
-        public async Task EditarPerfil(int idUser, string? alias, IFormFile? avatar, string? equipo, string? contrasena)
+        public async Task EditarPerfil(int idUsuario,UsuarioUpdateDTO usuario)
         {
-            UsuarioPuro usuarioPuro = await this.GetUsuario(idUser);
+            UsuarioPuro usuarioPuro = await this.GetUsuario(idUsuario);
             if (usuarioPuro == null)
             {
                 throw new Exception("Usuario no encontrado.");
             }
             bool cambios = false;
-            if (alias!=null)
+            if (usuario.Alias!=null)
             {
-                usuarioPuro.AliasName=alias;
+                usuarioPuro.AliasName=usuario.Alias;
                 cambios=true;
             }
-            if (equipo!=null)
+            if (usuario.Equipo!=null)
             {
-                usuarioPuro.Equipo=equipo;
+                usuarioPuro.Equipo=usuario.Equipo;
                 cambios=true;
             }
-            if (avatar!=null)
-            {
-                string filename = this.GenerateUniqueFileName(idUser, avatar);
-                usuarioPuro.Avatar=filename;
-                await this.SubirFichero(avatar, Folders.Avatar, filename);
-                cambios=true;
-            }
-            if (contrasena!=null)
+            //if (avatar!=null)
+            //{
+            //    string filename = this.GenerateUniqueFileName(idUser, avatar);
+            //    usuarioPuro.Avatar=filename;
+            //    await this.SubirFichero(avatar, Folders.Avatar, filename);
+            //    cambios=true;
+            //}
+            if (usuario.Contrasena!=null)
             {
                 usuarioPuro.Salt=HelperCryptography.GenerateSalt();
-                usuarioPuro.Contrasena=HelperCryptography.EncryptPassword(contrasena, usuarioPuro.Salt);
+                usuarioPuro.Contrasena=HelperCryptography.EncryptPassword(usuario.Contrasena, usuarioPuro.Salt);
                 cambios=true;
             }
             if (cambios)
@@ -307,10 +307,23 @@ namespace ApiCamisetas.Repositories
             }
         }
 
-        public async Task CreateUsuario(UsuarioPuro usuario)
+        public async Task CreateUsuario(UsuarioCreateDTO usuario)
         {
+            UsuarioPuro user=new UsuarioPuro();
+            user.IdUsuario=await this.GetMaxIdUsuario();
+            user.UserName=usuario.UserName;
+            user.AliasName=usuario.AliasName;
+            user.Correo=usuario.Correo.ToLower();
+            string salt = HelperCryptography.GenerateSalt();
+            user.Salt=salt;
+            user.Contrasena=HelperCryptography.EncryptPassword(usuario.Contrasena, salt);
+            user.Avatar=usuario.Avatar;
+            user.Equipo=usuario.Equipo;
+            user.Pais=usuario.Pais;
+            user.CodeAmistad=this.GenerateCodeAmistadUsuario();
+            user.FechaUnion=DateTime.UtcNow;
             //usuario.CodeAmistad=GenerateCodeAmistadUsuario();
-            await this.context.UsuariosPuros.AddAsync(usuario);
+            await this.context.UsuariosPuros.AddAsync(user);
             await this.context.SaveChangesAsync();
         }
 
@@ -445,13 +458,23 @@ namespace ApiCamisetas.Repositories
         }
         public async Task<bool> ExisteCorreo(string email)
         {
-            return await this.context.Usuarios.AnyAsync(u => u.Correo == email);
+            return await this.context.Usuarios.AnyAsync(u => u.Correo == email.ToLower());
+        }
+
+        public async Task<bool>ExistePais(string codigoPais)
+        {
+            return await this.context.Paises.AnyAsync(u => u.CodigoPais==codigoPais);
         }
 
 
         public async Task<List<Comentario>> GetComentariosAsync()
         {
             return await this.context.Comentarios.ToListAsync();
+        }
+
+        public async Task<List<UsuarioPuro>> GetUsuarioPurosAsync()
+        {
+            return await this.context.UsuariosPuros.ToListAsync();
         }
     }
 }

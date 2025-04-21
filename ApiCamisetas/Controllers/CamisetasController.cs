@@ -106,6 +106,8 @@ namespace ApiCamisetas.Controllers
 
         }
 
+
+        //CAMISETADTO ESPECIFICA PARA ACTUALIZAR? INCLUYENDO IDCAMISETA
         [Authorize]
         [HttpPut]
         [Route("[action]")]
@@ -145,6 +147,8 @@ namespace ApiCamisetas.Controllers
             return Ok();
         }
 
+        //PRUEBA
+        [Authorize]
         [HttpGet]
         [Route("[action]")]
         public async Task<ActionResult> Comentarios()
@@ -153,7 +157,22 @@ namespace ApiCamisetas.Controllers
             return Ok(comentarios);
         }
 
+        [Authorize]
+        [HttpPost]
+        [Route("[action]/{idCamiseta}")]
+        public async Task<ActionResult> InsertEtiquetas([FromBody]List<string>etiquetas,int idCamiseta)
+        {
+            await this.repo.InsertEtiquetas(etiquetas, idCamiseta);
+            return Ok();
+        }
 
-
+        [Authorize]
+        [HttpGet]
+        [Route("[action]/{idcamiseta}")]
+        public async Task<IActionResult>EtiquetasCamiseta(int idcamiseta)
+        {
+            List<Etiqueta> etiquetas = await this.repo.GetEtiquetas(idcamiseta);
+            return Ok(etiquetas);
+        }
     }
 }

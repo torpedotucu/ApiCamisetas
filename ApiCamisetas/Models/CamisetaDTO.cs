@@ -5,9 +5,9 @@ namespace ApiCamisetas.Models
 {
     public class CamisetaDTO
     {
-        [Key]
-        [Column("IdCamiseta")]
-        public int IdCamiseta { get; set; }
+        //[Key]
+        //[Column("IdCamiseta")]
+        //public int IdCamiseta { get; set; }
 
         [Column("Equipo")]
         public string Equipo { get; set; }
@@ -39,8 +39,8 @@ namespace ApiCamisetas.Models
         //[Column("Es_Activa")]
         //public int EsActiva { get; set; }
 
-        [Column("IdUsuario")]
-        public int IdUsuario { get; set; }
+        //[Column("IdUsuario")]
+        //public int IdUsuario { get; set; }
 
         //[Column("FechaSubida")]
         //public DateTime FechaSubida { get; set; }
