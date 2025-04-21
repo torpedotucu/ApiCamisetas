@@ -9,6 +9,8 @@ namespace ApiCamisetas.Models
     {
 
         public Camiseta Camiseta { get; set; }
-        public ICollection<Comentario> Comentarios { get; set; } = new List<Comentario>();
+
+        public List<Comentario> Comentarios { get; set; }
+
     }
 }

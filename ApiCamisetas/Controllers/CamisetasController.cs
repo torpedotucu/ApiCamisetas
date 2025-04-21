@@ -51,28 +51,23 @@ namespace ApiCamisetas.Controllers
                 return Ok(camiseta);
             }
         }
+        [Authorize]
+        [HttpGet]
+        [Route("DetallesCamiseta/{idcamiseta}")]
+        public async Task<ActionResult> DetallesCamiseta(int idcamiseta)
+        {
+            CamisetaComentarios camiseta = await this.repo.DetalleCamiseta(idcamiseta);
+            return Ok(camiseta);
+        }
 
         [Authorize]
         [HttpPost]
         [Route("[action]")]
-        public async Task<ActionResult> InsertarCamiseta([FromBody]Camiseta camiseta)
+        public async Task<ActionResult> InsertarCamiseta([FromBody]CamisetaCreateDTO camiseta)
         {
             Usuario usuario = this.helper.GetUsuario();
-            Camiseta camiseta1 = new Camiseta();
-            camiseta1.Equipo = camiseta.Equipo;
-            camiseta1.IdCamiseta=await this.repo.GetMaxIdCamiseta();
-            camiseta1.CodigoPais = camiseta.CodigoPais;
-            camiseta1.Year = camiseta.Year;
-            camiseta1.Marca = camiseta.Marca;
-            camiseta1.Equipacion = camiseta.Equipacion;
-            camiseta1.Condicion = camiseta.Condicion;
-            camiseta1.Dorsal = camiseta.Dorsal;
-            camiseta1.Jugador = camiseta.Jugador;
-            camiseta1.EsActiva = 1;
-            camiseta1.IdUsuario = usuario.IdUsuario;
-            camiseta1.FechaSubida = DateTime.Now;
-
-            int idCamiseta = await this.repo.SubirCamiseta(camiseta1);
+            
+            int idCamiseta = await this.repo.SubirCamiseta(usuario.IdUsuario,camiseta);
             if (idCamiseta == null || idCamiseta==0)
             {
                 return BadRequest();
@@ -111,7 +106,7 @@ namespace ApiCamisetas.Controllers
         [Authorize]
         [HttpPut]
         [Route("[action]")]
-        public async Task<ActionResult> ActualizarCamiseta([FromBody] Camiseta camiseta)
+        public async Task<ActionResult> ActualizarCamiseta([FromBody] CamisetaUpdateDTO camiseta)
         {
             Usuario usuario = this.helper.GetUsuario();
             Camiseta camiseta1 = await this.repo.GetCamiseta(camiseta.IdCamiseta);
@@ -123,39 +118,12 @@ namespace ApiCamisetas.Controllers
             {
                 return Forbid();
             }
-            await this.repo.ModificarCamiseta(camiseta.IdCamiseta, camiseta.Year,camiseta.Marca,camiseta.Descripcion,camiseta.Condicion,camiseta.Dorsal,camiseta.Jugador,camiseta.Imagen,usuario.IdUsuario);
+            await this.repo.ModificarCamiseta(camiseta.IdCamiseta, camiseta);
             return Ok();
         }
 
 
-        [HttpGet]
-        [Route("[action]/{idCamiseta}")]
-        public async Task<ActionResult>ComentariosCamiseta(int idCamiseta)
-        {
-            List<Comentario> comentarios = await this.repo.GetComentariosAsync(idCamiseta);
-            return Ok(comentarios);
-        }
-
-        [Authorize]
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<ActionResult> Comentar([FromBody]ComentarioDTO comentario)
-        {
-            comentario.UsuarioId= this.helper.GetUsuario().IdUsuario;
-            
-            await this.repo.Comentar(comentario);
-            return Ok();
-        }
-
-        //PRUEBA
-        [Authorize]
-        [HttpGet]
-        [Route("[action]")]
-        public async Task<ActionResult> Comentarios()
-        {
-            List<Comentario> comentarios = await this.repo.GetComentariosAsync();
-            return Ok(comentarios);
-        }
+        
 
         [Authorize]
         [HttpPost]
@@ -174,5 +142,7 @@ namespace ApiCamisetas.Controllers
             List<Etiqueta> etiquetas = await this.repo.GetEtiquetas(idcamiseta);
             return Ok(etiquetas);
         }
+
+
     }
 }
