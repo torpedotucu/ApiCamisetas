@@ -48,6 +48,19 @@ namespace ApiCamisetas.Controllers
         }
 
         [Authorize]
+        [HttpGet]
+        [Route("[action]/{correo}")]
+        public async Task<ActionResult<Usuario>>UsuarioCorreo(string correo)
+        {
+            Usuario usuario = await this.repo.GetUsuarioCorreo(correo);
+            if (usuario==null)
+            {
+                return NotFound();
+            }
+            return usuario;
+        }
+
+        [Authorize]
         [HttpPut]
         [Route("[action]")]
         public async Task<ActionResult> EditarPerfil([FromBody] UsuarioUpdateDTO user)

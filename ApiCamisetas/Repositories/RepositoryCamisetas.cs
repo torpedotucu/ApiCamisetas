@@ -4,6 +4,8 @@ using ApiCamisetas.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
+
+
 namespace ApiCamisetas.Repositories
 {
     public class RepositoryCamisetas
@@ -492,6 +494,13 @@ namespace ApiCamisetas.Repositories
         {
             Comentario c  =await this.context.Comentarios.Where(x => x.IdComentario==idComentario).FirstOrDefaultAsync();
             return c.UsuarioId;
+        }
+
+        public async Task<Usuario>GetUsuarioCorreo(string email)
+        {
+            Usuario user= await this.context.Usuarios
+                .Where(x => x.Correo==email).FirstOrDefaultAsync();
+            return user;
         }
     }
 }
