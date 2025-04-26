@@ -3,6 +3,7 @@ using ApiCamisetas.Models;
 using ApiCamisetas.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
 
 namespace ApiCamisetas.Controllers
 {
@@ -111,6 +112,17 @@ namespace ApiCamisetas.Controllers
             }
             return Ok(usuario);
         }
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult> Amigos()
+        {
+            int idUsuario = this.helper.GetUsuario().IdUsuario;
+            List<Usuario> amigos = await this.repo.GetListaAmigosAsync(idUsuario);
+            return Ok(amigos);
+        }
+
+
         [Authorize]
         [HttpPost]
         [Route("[action]/{idUsuario}")]
