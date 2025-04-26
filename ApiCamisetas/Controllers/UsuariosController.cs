@@ -100,7 +100,7 @@ namespace ApiCamisetas.Controllers
         }
         [Authorize]
         [HttpPost]
-        [Route("[action]")]
+        [Route("[action]/{idUsuario}")]
         public async Task<ActionResult> SetAmistad(int idUsuario)
         {
             int usuarioA = this.helper.GetUsuario().IdUsuario;
@@ -113,5 +113,9 @@ namespace ApiCamisetas.Controllers
             return Ok();
 
         }
+
+        
+
+        
     }
 }

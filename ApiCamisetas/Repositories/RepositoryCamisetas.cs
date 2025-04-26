@@ -419,7 +419,7 @@ namespace ApiCamisetas.Repositories
             {
 
                 var sql = "SP_INSERT_ETIQUETA_CAMISETA @nombreEtiqueta, @idCamiseta";
-                SqlParameter paramNombre = new SqlParameter("@nombreEtiqueta", etiqueta);
+                SqlParameter paramNombre = new SqlParameter("@nombreEtiqueta", etiqueta.ToLower());
                 SqlParameter paramCamiseta = new SqlParameter("@idCamiseta", idCamiseta);
                 var consulta = await this.context.Etiquetas.FromSqlRaw(sql, paramNombre, paramCamiseta).ToListAsync();
 
