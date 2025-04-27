@@ -4,6 +4,7 @@ using ApiCamisetas.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NugetJerseyHubRGO.Models;
 
 namespace ApiCamisetas.Controllers
 {
@@ -36,6 +37,24 @@ namespace ApiCamisetas.Controllers
                 return Ok(camisetas);
             }
         }
+
+        [Authorize]
+        [HttpGet]
+        [Route("[action]/{idUsuario}")]
+        public async Task<ActionResult> CamisetasUsuarioExterno(int idUsuario)
+        {
+            List<Camiseta> camisetas = await this.repo.GetCamisetasUsuario(idUsuario);
+            if (camisetas == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(camisetas);
+            }
+        }
+
+
         [Authorize]
         [HttpGet]
         [Route("[action]/{idCamiseta}")]

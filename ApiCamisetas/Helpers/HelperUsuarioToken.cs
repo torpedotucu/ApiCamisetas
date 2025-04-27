@@ -1,5 +1,6 @@
 ﻿using ApiCamisetas.Models;
 using Newtonsoft.Json;
+using NugetJerseyHubRGO.Models;
 using System.Security.Claims;
 
 namespace ApiCamisetas.Helpers

@@ -3,6 +3,7 @@ using ApiCamisetas.Helpers;
 using ApiCamisetas.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using NugetJerseyHubRGO.Models;
 
 
 
@@ -21,7 +22,7 @@ namespace ApiCamisetas.Repositories
             this.helperPathProvider=helperPathProvider;
         }
 
-        public async Task<Usuario?>LoginUsuario(string email,string contrasena)
+        public async Task<Usuario?> LoginUsuario(string email, string contrasena)
         {
             var consulta = this.context.UsuariosPuros.Where(x => x.Correo==email);
             UsuarioPuro user = await consulta.FirstOrDefaultAsync();
@@ -46,7 +47,7 @@ namespace ApiCamisetas.Repositories
                 }
             }
         }
-        public async Task<UsuarioPuro>GetUsuario(int idUsuario)
+        public async Task<UsuarioPuro> GetUsuario(int idUsuario)
         {
             //var consulta = from datos in this.context.UsuariosPuros
             //               where datos.IdUsuario==idUsuario
@@ -82,8 +83,8 @@ namespace ApiCamisetas.Repositories
             return camiseta;
         }
 
-        public async Task<int> SubirCamiseta(int idUsuario,CamisetaCreateDTO camiseta)
-        { 
+        public async Task<int> SubirCamiseta(int idUsuario, CamisetaCreateDTO camiseta)
+        {
             Camiseta camiseta1 = new Camiseta();
             camiseta1.Equipo = camiseta.Equipo;
             camiseta1.IdCamiseta=await this.GetMaxIdCamiseta();
@@ -102,7 +103,7 @@ namespace ApiCamisetas.Repositories
             return camiseta1.IdCamiseta;
         }
 
-        public async Task ModificarCamiseta(int idCamiseta,CamisetaUpdateDTO camiseta)
+        public async Task ModificarCamiseta(int idCamiseta, CamisetaUpdateDTO camiseta)
         {
             Camiseta cam = await this.GetCamiseta(idCamiseta);
 
@@ -166,7 +167,7 @@ namespace ApiCamisetas.Repositories
 
 
         //REVISAR
-        public async Task EditarPerfil(int idUsuario,UsuarioUpdateDTO usuario)
+        public async Task EditarPerfil(int idUsuario, UsuarioUpdateDTO usuario)
         {
             UsuarioPuro usuarioPuro = await this.GetUsuario(idUsuario);
             if (usuarioPuro == null)
@@ -221,14 +222,14 @@ namespace ApiCamisetas.Repositories
             return camisetaComentarios;
         }
 
-        public async Task Comentar(ComentarioDTO com)
+        public async Task Comentar(ComentarioDTO com, int idUsuario)
         {
-            Comentario comentario = new Comentario() ;
+            Comentario comentario = new Comentario();
             comentario.IdComentario= await this.GetMaxIdComment();
-            comentario.UsuarioId=com.UsuarioId;
+            comentario.UsuarioId= idUsuario;
             comentario.CamisetaId=com.CamisetaId;
             comentario.ComentarioTxt=com.ComentarioTxt;
-            comentario.Usuario=await this.GetUsuarioLibre(com.UsuarioId);
+            comentario.Usuario=await this.GetUsuarioLibre(idUsuario);
             comentario.FechaComentario=DateTime.UtcNow;
             await this.context.Comentarios.AddAsync(comentario);
             await this.context.SaveChangesAsync();
@@ -314,9 +315,9 @@ namespace ApiCamisetas.Repositories
             }
         }
 
-        public async Task CreateUsuario(UsuarioCreateDTO usuario)
+        public async Task<int> CreateUsuario(UsuarioCreateDTO usuario)
         {
-            UsuarioPuro user=new UsuarioPuro();
+            UsuarioPuro user = new UsuarioPuro();
             user.IdUsuario=await this.GetMaxIdUsuario();
             user.UserName=usuario.UserName;
             user.AliasName=usuario.AliasName;
@@ -332,6 +333,7 @@ namespace ApiCamisetas.Repositories
             //usuario.CodeAmistad=GenerateCodeAmistadUsuario();
             await this.context.UsuariosPuros.AddAsync(user);
             await this.context.SaveChangesAsync();
+            return user.IdUsuario;
         }
 
         public string GenerateCodeAmistadUsuario()
@@ -468,7 +470,7 @@ namespace ApiCamisetas.Repositories
             return await this.context.Usuarios.AnyAsync(u => u.Correo == email.ToLower());
         }
 
-        public async Task<bool>ExistePais(string codigoPais)
+        public async Task<bool> ExistePais(string codigoPais)
         {
             return await this.context.Paises.AnyAsync(u => u.CodigoPais==codigoPais);
         }
@@ -492,15 +494,21 @@ namespace ApiCamisetas.Repositories
         }
         public async Task<int> GetComentarioUsuario(int idComentario)
         {
-            Comentario c  =await this.context.Comentarios.Where(x => x.IdComentario==idComentario).FirstOrDefaultAsync();
+            Comentario c = await this.context.Comentarios.Where(x => x.IdComentario==idComentario).FirstOrDefaultAsync();
             return c.UsuarioId;
         }
 
-        public async Task<Usuario>GetUsuarioCorreo(string email)
+        public async Task<Usuario> GetUsuarioCorreo(string email)
         {
-            Usuario user= await this.context.Usuarios
+            Usuario user = await this.context.Usuarios
                 .Where(x => x.Correo==email).FirstOrDefaultAsync();
             return user;
+        }
+
+        public async Task<Pais> GetPais(string codigoPais)
+        {
+            Pais pais = await this.context.Paises.Where(x => x.CodigoPais==codigoPais).FirstOrDefaultAsync();
+            return pais;
         }
     }
 }

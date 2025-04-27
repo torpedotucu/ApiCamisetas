@@ -4,6 +4,7 @@ using ApiCamisetas.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NugetJerseyHubRGO.Models;
 
 namespace ApiCamisetas.Controllers
 {
@@ -32,9 +33,9 @@ namespace ApiCamisetas.Controllers
         [Route("[action]")]
         public async Task<ActionResult> Comentar([FromBody] ComentarioDTO comentario)
         {
-            comentario.UsuarioId= this.helper.GetUsuario().IdUsuario;
+            int idUsuario= this.helper.GetUsuario().IdUsuario;
 
-            await this.repo.Comentar(comentario);
+            await this.repo.Comentar(comentario,idUsuario);
             return Ok();
         }
 

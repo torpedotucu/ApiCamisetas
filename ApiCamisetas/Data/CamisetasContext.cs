@@ -1,5 +1,6 @@
 ﻿using ApiCamisetas.Models;
 using Microsoft.EntityFrameworkCore;
+using NugetJerseyHubRGO.Models;
 
 namespace ApiCamisetas.Data
 {

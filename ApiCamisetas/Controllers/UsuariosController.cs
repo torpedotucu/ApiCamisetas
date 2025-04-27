@@ -3,6 +3,7 @@ using ApiCamisetas.Models;
 using ApiCamisetas.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NugetJerseyHubRGO.Models;
 using System.Runtime.CompilerServices;
 
 namespace ApiCamisetas.Controllers
@@ -68,7 +69,7 @@ namespace ApiCamisetas.Controllers
         {
             int idUsuario = this.helper.GetUsuario().IdUsuario;
             await this.repo.EditarPerfil(idUsuario, user);
-            return Ok();
+            return Ok(idUsuario);
         }
 
         [HttpPost]
@@ -83,9 +84,9 @@ namespace ApiCamisetas.Controllers
             {
                 return Conflict(new { mensaje = "El codigo de pais no existe" });
             }
-            await this.repo.CreateUsuario(usuario);
-            List<UsuarioPuro> usuarioPuros = await this.repo.GetUsuarioPurosAsync();
-            return Ok(usuarioPuros);
+            int idUsuario=await this.repo.CreateUsuario(usuario);
+            
+            return Ok(idUsuario);
 
         }
 
@@ -121,6 +122,15 @@ namespace ApiCamisetas.Controllers
             List<Usuario> amigos = await this.repo.GetListaAmigosAsync(idUsuario);
             return Ok(amigos);
         }
+        [Authorize]
+        [HttpGet]
+        [Route("[action]/{idUsuario}")]
+        public async Task<ActionResult> AmigosUsuario(int idUsuario)
+        {
+             
+            List<Usuario> amigos = await this.repo.GetListaAmigosAsync(idUsuario);
+            return Ok(amigos);
+        }
 
 
         [Authorize]
@@ -139,7 +149,16 @@ namespace ApiCamisetas.Controllers
 
         }
 
-        
+        [Authorize]
+        [HttpGet]
+        [Route("[action]/{idUsuario}")]
+        public async Task<ActionResult>AreFriends(int idUsuario)
+        {
+            int usuarioA = this.helper.GetUsuario().IdUsuario;
+            int usuarioB = idUsuario;
+            bool loson=await this.repo.AreAlreadyFriends(usuarioA, usuarioB);
+            return Ok(loson);
+        }
 
         
     }

@@ -5,13 +5,21 @@ using ApiCamisetas.Repositories;
 using ApiCamisetas.Data;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Azure.Security.KeyVault.Secrets;
+using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAzureClients(factory =>
+{
+    factory.AddSecretClient(builder.Configuration.GetSection("KeyVault"));
 
-HelperCryptography.Initialize(builder.Configuration);
+});
+SecretClient secretClient = builder.Services.BuildServiceProvider().GetService<SecretClient>();
+HelperCryptography.Initialize(builder.Configuration,secretClient);
+builder.Services.AddTransient<HelperUsuarioToken>();
 builder.Services.AddHttpContextAccessor();
 
-HelperActionServicesOAuth helper = new HelperActionServicesOAuth(builder.Configuration);
+HelperActionServicesOAuth helper = new HelperActionServicesOAuth(builder.Configuration,secretClient);
 
 builder.Services.AddSingleton<HelperActionServicesOAuth>(helper);
 builder.Services.AddAuthentication(helper.GetAuthenticateSchema()).AddJwtBearer(helper.GetJwtBearerOptions());
@@ -34,8 +42,10 @@ builder.Services.AddOpenApiDocument(document =>
     new AspNetCoreOperationSecurityScopeProcessor("JWT"));
 });
 
-builder.Services.AddScoped<HelperUsuarioToken>();
-string connectionString = builder.Configuration.GetConnectionString("SqlCamisetas");
+//builder.Services.AddScoped<HelperUsuarioToken>();
+KeyVaultSecret secret = await secretClient.GetSecretAsync("SqlCamisetas");
+string connectionString = secret.Value;
+
 builder.Services.AddTransient<HelperPathProvider>();
 builder.Services.AddTransient<RepositoryCamisetas>();
 builder.Services.AddDbContext<CamisetasContext>(options => options.UseSqlServer(connectionString));

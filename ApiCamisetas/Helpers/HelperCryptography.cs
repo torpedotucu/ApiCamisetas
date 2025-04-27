@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Azure.Security.KeyVault.Secrets;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -69,32 +70,41 @@ namespace ApiCamisetas.Helpers
          * 
          */
         private static IConfiguration configuration;
-        private static string keyCifrado;
-        public static void Initialize(IConfiguration config)
+        private static SecretClient secretClient;
+        public static void Initialize(IConfiguration config,SecretClient client)
         {
             configuration = config;
-            keyCifrado = configuration.GetValue<string>("ApiOAuth:CryptoKey");
+            secretClient = client;
         }
 
-        public static string EncryptString(String dato)
+        
+        public static string EncryptString(string dato)
         {
-            var saltconf = configuration.GetValue<string>("Crypto:Salt");
-            var bucleconf = configuration.GetValue<string>("Crypto:Iterate");
-            string password = configuration.GetValue<string>("Crypto:Key");
+            KeyVaultSecret secretSalt = secretClient.GetSecret("Salt");
+            var saltconf = secretSalt.Value;
+            KeyVaultSecret secretIterate = secretClient.GetSecret("Iterate");
+            var bucleconf = secretIterate.Value;
+            KeyVaultSecret secretKey = secretClient.GetSecret("Key");
+            string passwd = secretKey.Value;
+
             byte[] saltpassword = EncriptarPasswordSalt
-                (password, saltconf, int.Parse(bucleconf));
-            String res = EncryptString(saltpassword, dato);
+                (passwd, saltconf, int.Parse(bucleconf));
+            string res = EncryptString(saltpassword, dato);
             return res;
         }
 
-        public static string DecryptString(String dato)
+        public static string DecryptString(string dato)
         {
-            var saltconf = configuration.GetValue<string>("Crypto:Salt");
-            var bucleconf = configuration.GetValue<string>("Crypto:Iterate");
-            string password = configuration.GetValue<string>("Crypto:Key");
+            KeyVaultSecret secretSalt = secretClient.GetSecret("Salt");
+            var saltconf = secretSalt.Value;
+            KeyVaultSecret secretIterate = secretClient.GetSecret("Iterate");
+            var bucleconf = secretIterate.Value;
+            KeyVaultSecret secretKey = secretClient.GetSecret("Key");
+            string passwd = secretKey.Value;
+
             byte[] saltpassword = EncriptarPasswordSalt
-                (password, saltconf, int.Parse(bucleconf));
-            String res = DecryptString(saltpassword, dato);
+                (passwd, saltconf, int.Parse(bucleconf));
+            string res = DecryptString(saltpassword, dato);
             return res;
         }
 

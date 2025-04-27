@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Azure.Security.KeyVault.Secrets;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -7,18 +8,24 @@ namespace ApiCamisetas.Helpers
 {
     public class HelperActionServicesOAuth
     {
+        
+
         public string Issuer { get; set; }
         public string Audience { get; set; }
         public string SecretKey { get; set; }
-        public HelperActionServicesOAuth(IConfiguration configuration)
+
+        private SecretClient secretclient;
+        public HelperActionServicesOAuth(IConfiguration configuration, SecretClient client)
         {
-            this.Issuer =
-                configuration.GetValue<string>("ApiOAuthToken:Issuer");
-            this.Audience =
-                configuration.GetValue<string>("ApiOAuthToken:Audience");
-            this.SecretKey =
-                configuration.GetValue<string>("ApiOAuthToken:SecretKey");
+            this.secretclient = client;
+            KeyVaultSecret secretIssuer = this.secretclient.GetSecret("Issuer");
+            this.Issuer = secretIssuer.Value;
+            KeyVaultSecret secretAudience = this.secretclient.GetSecret("Audience");
+            this.Audience = secretAudience.Value;
+            KeyVaultSecret secretKey = this.secretclient.GetSecret("SecretKey");
+            this.SecretKey = secretKey.Value;
         }
+
 
         //NECESITAMOS UN METODO PARA GENERAR EL TOKEN
         //DICHO TOKEN SE BASA EN NUESTRO SECRET KEY
