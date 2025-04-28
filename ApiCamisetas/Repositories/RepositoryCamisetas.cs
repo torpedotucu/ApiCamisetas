@@ -98,6 +98,8 @@ namespace ApiCamisetas.Repositories
             camiseta1.EsActiva = 1;
             camiseta1.IdUsuario = idUsuario;
             camiseta1.FechaSubida = DateTime.Now;
+            camiseta1.Imagen=camiseta.Imagen;
+            camiseta1.Descripcion=camiseta.Descripcion;
             await this.context.Camisetas.AddAsync(camiseta1);
             await this.context.SaveChangesAsync();
             return camiseta1.IdCamiseta;

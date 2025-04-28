@@ -67,6 +67,11 @@ if (app.Environment.IsDevelopment())
 }
 app.MapOpenApi();
 app.MapScalarApiReference();
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/scalar");
+    return Task.CompletedTask;
+});
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
