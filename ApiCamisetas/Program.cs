@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Azure;
+using ApiCamisetas.Services;
+using Azure.Storage.Blobs;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAzureClients(factory =>
@@ -20,6 +22,14 @@ builder.Services.AddTransient<HelperUsuarioToken>();
 builder.Services.AddHttpContextAccessor();
 
 HelperActionServicesOAuth helper = new HelperActionServicesOAuth(builder.Configuration,secretClient);
+
+
+KeyVaultSecret storageSecret = await secretClient.GetSecretAsync("StorageAccount");
+string storage = storageSecret.Value;
+BlobServiceClient blobServiceClient = new BlobServiceClient(storage);
+builder.Services.AddTransient<BlobServiceClient>(x => blobServiceClient);
+builder.Services.AddTransient<ServiceStorageBlobs>();
+
 
 builder.Services.AddSingleton<HelperActionServicesOAuth>(helper);
 builder.Services.AddAuthentication(helper.GetAuthenticateSchema()).AddJwtBearer(helper.GetJwtBearerOptions());

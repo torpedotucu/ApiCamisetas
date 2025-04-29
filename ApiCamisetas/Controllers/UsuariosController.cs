@@ -41,7 +41,7 @@ namespace ApiCamisetas.Controllers
         [Route("[action]/{idUsuario}")]
         public async Task<ActionResult> GetUsuario(int idUsuario)
         {
-            Usuario usuario = await this.repo.GetUsuarioLibre(idUsuario);
+            Usuario usuario = await this.repo.GetUsuarioLibreBlob(idUsuario);
             if (usuario==null)
             {
                 return NotFound();

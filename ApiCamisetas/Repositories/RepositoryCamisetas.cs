@@ -1,6 +1,7 @@
 ﻿using ApiCamisetas.Data;
 using ApiCamisetas.Helpers;
 using ApiCamisetas.Models;
+using ApiCamisetas.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using NugetJerseyHubRGO.Models;
@@ -14,12 +15,14 @@ namespace ApiCamisetas.Repositories
         private CamisetasContext context;
         private IWebHostEnvironment hostEnvironment;
         private HelperPathProvider helperPathProvider;
+        ServiceStorageBlobs serviceBlobs;
 
-        public RepositoryCamisetas(CamisetasContext context, IWebHostEnvironment hostEnvironment, HelperPathProvider helperPathProvider)
+        public RepositoryCamisetas(CamisetasContext context, IWebHostEnvironment hostEnvironment, HelperPathProvider helperPathProvider,ServiceStorageBlobs service)
         {
             this.context=context;
             this.hostEnvironment=hostEnvironment;
             this.helperPathProvider=helperPathProvider;
+            this.serviceBlobs=service;
         }
 
         public async Task<Usuario?> LoginUsuario(string email, string contrasena)
@@ -511,6 +514,26 @@ namespace ApiCamisetas.Repositories
         {
             Pais pais = await this.context.Paises.Where(x => x.CodigoPais==codigoPais).FirstOrDefaultAsync();
             return pais;
+        }
+
+        public async Task<Usuario>GetUsuarioLibreBlob(int id)
+        {
+            Usuario usuario = await this.context.Usuarios.Where(x => x.IdUsuario==id).FirstOrDefaultAsync();
+            if (!string.IsNullOrEmpty(usuario.Avatar))
+            {
+                string containerUrl = this.serviceBlobs.GetContainerUrl("camisetas");
+
+                if (!usuario.Avatar.StartsWith("http"))
+                {
+                    string imagePath = usuario.Avatar;
+                    
+
+                    usuario.Avatar = containerUrl + "/" + imagePath;
+                }
+                
+            }
+
+            return usuario;
         }
     }
 }
